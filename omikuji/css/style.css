@@ -1,0 +1,140 @@
+@import url('https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c:700,900&display=swap');
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0 auto;
+  background-color: #FFF;
+  font-family:"M PLUS Rounded 1c","ヒラギノ丸ゴ Pro W4","ヒラギノ丸ゴ Pro","Hiragino Maru Gothic Pro","ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro","HG丸ｺﾞｼｯｸM-PRO","HGMaruGothicMPRO";
+  position: relative;
+}
+
+a {
+  text-decoration: none;
+}
+
+.mv {
+  margin-bottom: 30px;
+  background-color: #ffbeb1;
+}
+
+.mv .inner {
+  background-image: url(../images/img_01.png) ;
+  background-repeat:  no-repeat;
+  background-position: center;
+  background-size:  100%;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-weight: 900;
+  text-align: center;
+  color: #390800;
+  margin: 0;
+}
+
+@media screen and (min-width: 320px) {
+  h1 {
+    font-size: 36px;
+  }
+  .mv .inner {
+    padding: 30px 0;
+  }
+ }
+
+ @media screen and (min-width:768px) and ( max-width:1024px) {
+  h1 {
+    font-size: 60px;
+  }
+  .mv .inner {
+    padding: 40px 0;
+  }
+}
+
+ @media screen and (min-width: 1024px) {
+  h1 {
+    font-size: 60px;
+  }
+  .mv .inner {
+    padding: 44px 0;
+  }
+ }
+
+.contents {
+  margin-bottom: 60px;
+  text-align: center;
+}
+
+/* CSS sprite */
+.imageArea {
+  display: block;
+  margin: 30px auto 0;
+  background: url(../images/img_02.png) no-repeat;
+  width: 250px;
+  height: 500px;
+}
+
+/* animation */
+.imageArea {
+  animation: omikuji 0.1s steps(13) infinite;
+}
+
+/* Both animations are used the same keyframes */
+@keyframes omikuji {
+  to {
+    background-position: -3250px 0;
+  }
+}
+
+/* btn */
+#stop:checked ~ .imageArea{
+  animation-play-state: paused;
+}
+
+label{
+  display: block;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 20px 70px;
+  padding: 15px 0;
+  background-color: #dc4909;
+  color: #FFF;
+  border-radius: 40px;
+}
+
+@media screen and (min-width: 320px) {
+  label{
+    margin: 0 20%;
+  }
+ }
+
+ @media screen and (min-width:768px) and ( max-width:1024px) {
+  label{
+    margin: 0 25%;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  label{
+    margin: 0 40%;
+  }
+ }
+
+input{
+  display: none;
+}
+
+.btn:checked + .btn_txt {
+  background-color: #EC6455;
+}
+
+
+
+
+
