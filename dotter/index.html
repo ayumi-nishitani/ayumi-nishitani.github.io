@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ドット変換ツール</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+<main>
+  <h1>ドット変換ツール</h1>
+  <input type="file" id="upload" accept="image/*">
+
+  <div id="container">
+    <canvas id="original" width="256" height="256"></canvas>
+    <canvas id="converted" width="256" height="256"></canvas>
+    <div id="slider"></div>
+  </div>
+
+  <div id="controls">
+    <label for="dotSize">ドットサイズ：</label>
+    <select id="dotSize">
+      <option value="8">8×8</option>
+      <option value="16">16×16</option>
+      <option value="24">24×24</option>
+      <option value="32" selected>32×32</option>
+      <option value="64">64×64</option>
+    </select>
+    <button id="download" class="modBtn">画像をダウンロード</button>
+  </div>
+  </main>
+<script defer src="js/common.js"></script>
+</body>
+</html>
