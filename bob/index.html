@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>カタカナでの説明禁止！単語当てクイズ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=WDXL+Lubrifont+JP+N&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #FDF146;
+      color: #333333;
+      font-family: "WDXL Lubrifont JP N", 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+      font-weight: 400;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      gap: 28px;
+      position: relative;
+    }
+
+    body.tonny-mode {
+      background: #f299a6;
+    }
+
+    /* ── title ── */
+
+    .title-row {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      max-width: 720px;
+    }
+
+    .title {
+      text-align: center;
+      font-size: clamp(2.4rem, 10vw, 4rem);
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      line-height: 1.2;
+      color: #333333;
+      user-select: none;
+    }
+
+    .title-line1 {
+      position: relative;
+      display: inline-block;
+      font-size: 0.6em;
+    }
+
+    .title-line2 {
+      position: relative;
+      display: inline-block;
+    }
+
+    #tenioha {
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 1.1em;
+      width: auto;
+      margin-left: 0.1em;
+      display: none;
+    }
+
+    body.tonny-mode #tenioha {
+      display: block;
+    }
+
+    /* ── answer area ── */
+
+    .answer-area {
+      width: 100%;
+      max-width: 720px;
+      background: #333333;
+      border-radius: 20px;
+      padding: 22px 24px;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      display: none;
+    }
+
+    .answer-area.active {
+      display: block;
+    }
+
+    .answer-text {
+      font-size: 2rem;
+      color: #FDF146;
+      letter-spacing: 0.12em;
+    }
+
+    body.tonny-mode .answer-area {
+      background: #333333;
+    }
+
+    /* ── candidates grid ── */
+
+    .candidates-list {
+      width: 100%;
+      max-width: 720px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .candidate-row {
+      display: flex;
+      align-items: center;
+      background: #ffffff;
+      border: 2px solid rgba(0, 0, 0, 0.1);
+      border-radius: 20px;
+      padding: 18px 16px;
+      gap: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+      min-height: 72px;
+      transition: border-color 0.35s ease, background 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    .candidate-row.revealed {
+      border-color: #f92e4b;
+      background: #fff5f7;
+      box-shadow: 0 4px 18px rgba(249, 46, 75, 0.15);
+    }
+
+    .candidate-num {
+      font-size: 0.72rem;
+      color: #bbbbbb;
+      font-weight: 400;
+      min-width: 14px;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .candidate-text {
+      flex: 1;
+      font-size: 1.2rem;
+      line-height: 1.4;
+      color: #333333;
+      transition: color 0.35s ease, background 0.35s ease;
+      border-radius: 6px;
+    }
+
+    /* 伏せ状態：テキストを隠してグレーバーに見せる */
+    .candidate-row.facedown .candidate-text {
+      background: #e8e8e8;
+      color: transparent;
+      user-select: none;
+    }
+
+    .candidate-row.revealed .candidate-text {
+      color: #f92e4b;
+      font-weight: 700;
+    }
+
+    /* ── controls ── */
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 14px 32px;
+      border: 2px solid transparent;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 400;
+      font-family: "WDXL Lubrifont JP N", 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+      cursor: pointer;
+      letter-spacing: 0.06em;
+      user-select: none;
+      transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .btn:active { transform: scale(0.95); }
+
+    /* お題ボタン（メイン） */
+    .btn-odai {
+      background: #333333;
+      color: #ffffff;
+      border-color: #333333;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    }
+    .btn-odai:hover {
+      background: #555555;
+      border-color: #555555;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    }
+
+    /* ヒントボタン */
+    .btn-hint {
+      background: #ffffff;
+      color: #bbbbbb;
+      border-color: rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    }
+    .btn-hint:hover { background: #f5f5f5; color: #888888; }
+    .btn-hint.active {
+      background: #333333;
+      color: #ffffff;
+      border-color: #333333;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    }
+    .btn-hint.active:hover {
+      background: #555555;
+      border-color: #555555;
+    }
+
+    /* 正解は？ボタン */
+    .btn-reveal {
+      background: #ffffff;
+      color: #bbbbbb;
+      border-color: rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    }
+    .btn-reveal:hover { background: #f5f5f5; color: #888888; }
+    .btn-reveal.ready {
+      background: #333333;
+      color: #ffffff;
+      border-color: #333333;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+    .btn-reveal.ready:hover {
+      background: #555555;
+      border-color: #555555;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28);
+    }
+
+    /* 正解は？ + コピーアイコンをまとめるグループ */
+    .reveal-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .copy-answer-btn {
+      background: #ffffff;
+      border: 2px solid rgba(0, 0, 0, 0.1);
+      border-radius: 999px;
+      cursor: pointer;
+      color: #bbbbbb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+      transition: color 0.15s, background 0.15s, border-color 0.15s;
+    }
+    .copy-answer-btn:hover {
+      color: #333333;
+      border-color: rgba(0, 0, 0, 0.25);
+      background: #f5f5f5;
+    }
+    .copy-answer-btn:active {
+      transform: scale(0.88);
+      transition: transform 0.08s;
+    }
+    .copy-answer-btn:disabled {
+      opacity: 0.3;
+      cursor: default;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="title-row">
+    <h1 class="title"><span class="title-line1">カタカナでの説明禁止！</span><br><span class="title-line2">単語当てクイズ<img id="tenioha" src="image/img-tenioha.png" alt=""></span></h1>
+  </div>
+
+  <div class="answer-area" id="answerArea">
+    <span class="answer-text" id="answerText">？？？</span>
+  </div>
+
+  <div class="candidates-list" id="candidatesList" style="display:none;"></div>
+
+  <div class="controls">
+    <button class="btn btn-hint"   id="hintBtn"   onclick="handleHint()">ヒント</button>
+    <button class="btn btn-odai"   id="odaiBtn"   onclick="handleOdai()">お題</button>
+    <div class="reveal-group">
+      <button class="btn btn-reveal" id="revealBtn" onclick="toggleReveal()">正解は？</button>
+      <button class="copy-answer-btn" id="copyAnswerBtn" title="正解をコピー" disabled onclick="handleCopyAnswer()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /* ── pool ── */
+    const WORD_POOL = [
+      ['ホッチキス', 'ボールペン', 'シャーペン', 'マーカー', 'ノート', 'ルーズリーフ'],
+      ['フライパン', 'トースター', 'ミキサー', 'ラップ', 'アルミホイル', 'スポンジ'],
+      ['カフェラテ', 'エスプレッソ', 'カプチーノ', 'アイスコーヒー', 'フラペチーノ', 'ティーバッグ'],
+      ['プラスチック', 'ビニール', 'ナイロン', 'ポリエステル', 'シリコン', 'ラバー'],
+      ['ギター', 'ピアノ', 'ドラム', 'バイオリン', 'サックス', 'トランペット'],
+      ['サッカー', 'バスケットボール', 'テニス', 'バレーボール', 'ラグビー', 'ハンドボール'],
+      ['テレビ', 'エアコン', 'オーブン', 'トースター', 'ドライヤー', 'アイロン'],
+      ['ジャケット', 'スウェット', 'パーカー', 'スニーカー', 'サンダル', 'ジーンズ'],
+      ['ティッシュ', 'タオル', 'コースター', 'ストロー', 'ハンガー', 'バケツ'],
+      ['スマートフォン', 'タブレット', 'ノートパソコン', 'マウス', 'キーボード', 'ルーター'],
+      ['オレンジジュース', 'アップルジュース', 'コーラ', 'サイダー', 'ミネラルウォーター', 'スポーツドリンク'],
+      ['チョコレート', 'クッキー', 'トッポ', 'ガム', 'ビスケット', 'キャラメル'],
+      ['テーブル', 'ソファ', 'ベッド', 'エアロバイク', 'ベランダ', 'クローゼット'],
+      ['ハンバーガー', 'サンドイッチ', 'ホットドッグ', 'フライドポテト', 'ピザ', 'ドーナツ'],
+      ['オムライス', 'ハンバーグ', 'カレーライス', 'グラタン', 'ドリア', 'ナポリタン'],
+      ['ファンデーション', 'コンシーラー', 'マスカラ', 'ボブカット', 'ポニーテール', 'チーク'],
+      ['シャンプー', 'コンディショナー', 'トリートメント', 'ボディソープ', 'タオル', 'スポンジ'],
+      ['メモ', 'レポート', 'プリント', 'コピー', 'ファイル', 'クリップ'],
+      ['バス', 'タクシー', 'トラック', 'バイク', 'ヘリコプター', 'ジェットコースター'],
+      ['ホテル', 'チェックイン', 'チェックアウト', 'フロント', 'ロビー', 'スイートルーム'],
+      ['レジ', 'カート', 'ポイントカード', 'レシート', 'クレーム', 'セール'],
+      ['テスト', 'ノート', 'プリント', 'チャイム', 'ロッカー', 'スクールバッグ'],
+      ['アニメ', 'ドラマ', 'ドキュメンタリー', 'バラエティ', 'ニュース', 'ミステリー'],
+      ['レベル', 'スコア', 'ステージ', 'ボーナス', 'ゲームオーバー', 'リトライ'],
+      ['プリンター', 'スキャナー', 'デスクトップパソコン', 'ノートパソコン', 'ファイル', 'モニター'],
+      ['スパゲッティ', 'グラタン', 'ドリア', 'ピラフ', 'リゾット', 'ラザニア'],
+      ['パーティー', 'フェス', 'ライブ', 'セレモニー', 'イベント', 'キャンペーン'],
+      ['ウイルス', 'ワクチン', 'クリニック', 'カルテ', 'サプリメント', 'カウンセリング'],
+      ['ビル', 'マンション', 'アパート', 'オフィス', 'ホール', 'スタジアム'],
+      ['スケジュール', 'タイムテーブル', 'ミーティング', 'アポイント', 'プラン', 'タイマー'],
+    ];
+
+    /* ── state ── */
+    let currentWords = [];
+    let selectedIdx  = -1;
+    let revealed     = false;
+    let hintsShown   = false;
+
+    /* ── weight config ── */
+    // 自動ルール: 全カタカナ かつ 5文字以上 → 重み3、それ以外 → 重み1
+    // 以下で個別上書き（自動スコアが合わない単語のみ）
+    const WEIGHT_OVERRIDES = {
+      // 言いかえが難しいもの → 高め
+      'ガム':             3,
+      'コーラ':           3,
+      'ラバー':           2,
+      'サックス':         3,
+      'ドラム':           2,
+      'チーク':           2,
+      'レジ':             2,
+      'フェス':           2,
+      'ライブ':           2,
+      'カルテ':           3,
+      // 説明しやすいもの → 低め
+      'シャーペン':       1,
+      'ノート':           1,
+      'タオル':           1,
+      'サッカー':         1,
+      'オーブン':         1,
+      'ドライヤー':       1,
+      'エアコン':         1,
+      'アイロン':         1,
+      'オレンジジュース': 1,
+      'アップルジュース': 1,
+      'ドーナツ':         1,
+      'コピー':           1,
+      'ニュース':         1,
+    };
+
+    function wordWeight(word) {
+      if (word in WEIGHT_OVERRIDES) return WEIGHT_OVERRIDES[word];
+      return /^[゠-ヿ]+$/.test(word) && word.length >= 5 ? 3 : 1;
+    }
+
+    function weightedPickIdx(words) {
+      const weights = words.map(wordWeight);
+      const total   = weights.reduce((a, b) => a + b, 0);
+      let r = Math.random() * total;
+      for (let i = 0; i < weights.length; i++) {
+        r -= weights[i];
+        if (r <= 0) return i;
+      }
+      return words.length - 1;
+    }
+
+    /* ── helpers ── */
+    function pickGroup() {
+      return WORD_POOL[Math.floor(Math.random() * WORD_POOL.length)];
+    }
+
+    /* ── render ── */
+    function render() {
+      const list = document.getElementById('candidatesList');
+      list.innerHTML = '';
+
+      currentWords.forEach((word, i) => {
+        const isAnswer = revealed && i === selectedIdx;
+        const facedown = !hintsShown;
+
+        const row = document.createElement('div');
+        row.className = [
+          'candidate-row',
+          facedown  ? 'facedown'  : '',
+          isAnswer  ? 'revealed'  : '',
+        ].filter(Boolean).join(' ');
+
+        const num = document.createElement('span');
+        num.className   = 'candidate-num';
+        num.textContent = i + 1;
+
+        const txt = document.createElement('span');
+        txt.className   = 'candidate-text';
+        txt.textContent = word;
+
+        row.appendChild(num);
+        row.appendChild(txt);
+        list.appendChild(row);
+      });
+
+      // candidates list visibility
+      document.getElementById('candidatesList').style.display = hintsShown ? 'grid' : 'none';
+
+      // answer area
+      const answerArea = document.getElementById('answerArea');
+      const answerText = document.getElementById('answerText');
+      if (selectedIdx === -1) {
+        answerArea.classList.remove('active');
+      } else {
+        answerArea.classList.add('active');
+        answerText.textContent = revealed ? currentWords[selectedIdx] : '？？？';
+      }
+
+      // buttons
+      document.getElementById('hintBtn').classList.toggle('active', selectedIdx !== -1);
+      document.getElementById('revealBtn').classList.toggle('ready', selectedIdx !== -1);
+      document.getElementById('copyAnswerBtn').disabled = selectedIdx === -1;
+    }
+
+    /* ── actions ── */
+    function handleCopyAnswer() {
+      if (selectedIdx === -1) return;
+      const word = currentWords[selectedIdx];
+      const text = `XXさんへのお題は「${word}」です！カタカナを使わずにカタカナ語を説明しましょう！`;
+      navigator.clipboard.writeText(text).catch(() => {});
+    }
+
+    function handleHint() {
+      hintsShown = !hintsShown;
+      render();
+    }
+
+    function handleOdai() {
+      currentWords = pickGroup();
+      selectedIdx  = weightedPickIdx(currentWords);
+      revealed     = false;
+      hintsShown   = false;
+      const wasTonny = document.body.classList.contains('tonny-mode');
+      document.body.classList.toggle('tonny-mode', !wasTonny && Math.random() < 0.3);
+      render();
+    }
+
+    function toggleReveal() {
+      if (selectedIdx === -1) return;
+      revealed = !revealed;
+      render();
+    }
+
+    /* ── init ── */
+    currentWords = pickGroup();
+    render();
+  </script>
+</body>
+</html>
