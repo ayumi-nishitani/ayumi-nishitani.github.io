@@ -274,6 +274,132 @@
       cursor: default;
       pointer-events: none;
     }
+
+    /* ── 遊び方ボタン ── */
+    .howto-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #333333;
+      color: #ffffff;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 22px;
+      font-size: 0.9rem;
+      font-family: "WDXL Lubrifont JP N", 'Helvetica Neue', Arial, sans-serif;
+      font-weight: 400;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      z-index: 100;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .howto-btn:hover {
+      background: #555555;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+    }
+
+    /* ── モーダル ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 36px 28px 28px;
+      max-width: 460px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
+      transform: translateY(20px);
+      transition: transform 0.22s ease;
+    }
+    .modal-overlay.open .modal {
+      transform: translateY(0);
+    }
+    .modal-title {
+      font-size: 2.0rem;
+      font-weight: 400;
+      color: #333333;
+      text-align: center;
+      margin-bottom: 24px;
+      letter-spacing: 0.08em;
+    }
+    .modal-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .modal-step {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .modal-step-num {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      background: #FDF146;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: #333333;
+      margin-top: 2px;
+    }
+    .modal-step-text {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: #444444;
+      font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', -apple-system, BlinkMacSystemFont, 'Yu Gothic', 'Meiryo', sans-serif;
+      font-weight: bold;
+    }
+    .modal-step-text strong {
+      color: #333333;
+    }
+    .modal-note {
+      background: #f7f7f7;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 0.83rem;
+      line-height: 1.7;
+      color: #666666;
+      margin-bottom: 24px;
+      font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', -apple-system, BlinkMacSystemFont, 'Yu Gothic', 'Meiryo', sans-serif;
+      font-weight: bold;
+    }
+    .modal-close {
+      display: block;
+      margin: 0 auto;
+      background: #333333;
+      color: #ffffff;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 36px;
+      font-size: 0.95rem;
+      font-family: "WDXL Lubrifont JP N", 'Helvetica Neue', Arial, sans-serif;
+      font-weight: 400;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .modal-close:hover { background: #555555; }
   </style>
 </head>
 <body>
@@ -300,6 +426,39 @@
           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
         </svg>
       </button>
+    </div>
+  </div>
+
+  <!-- 遊び方ボタン -->
+  <button class="howto-btn" onclick="openModal()">遊び方はコチラ！</button>
+
+  <!-- 遊び方モーダル -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModalOnOverlay(event)">
+    <div class="modal">
+      <div class="modal-title">遊び方</div>
+      <div class="modal-steps">
+        <div class="modal-step">
+          <div class="modal-step-num">1</div>
+          <div class="modal-step-text">「お題」ボタンを押すと、候補の中からひとつお題として選ばれます。画面には「？？？」と表示されます。</div>
+        </div>
+        <div class="modal-step">
+          <div class="modal-step-num">2</div>
+          <div class="modal-step-text">コピーボタンを押すと、お題のメッセージをコピーできます。Slackなどで送って、お題を出す人だけが確認しましょう！</div>
+        </div>
+        <div class="modal-step">
+          <div class="modal-step-num">3</div>
+          <div class="modal-step-text">お題を持っている人は、<strong>カタカナ語をひとつも使わずに</strong>その単語を説明します。「スマートフォン」なら「スマホ」も「フォン」もNG！</div>
+        </div>
+        <div class="modal-step">
+          <div class="modal-step-num">4</div>
+          <div class="modal-step-text">説明を聞いたみんなが、候補の中から答えを当てます。難しければヒントボタンを押しましょう！</div>
+        </div>
+      </div>
+      <div class="modal-note">
+        「てにをはNG」が出たら接続語を使わず説明してください！<br>
+        例：（お題「プリン」）👦 ＜卵　使う　お菓子…
+      </div>
+      <button class="modal-close" onclick="closeModal()">とじる</button>
     </div>
   </div>
 
@@ -389,6 +548,17 @@
         if (r <= 0) return i;
       }
       return words.length - 1;
+    }
+
+    /* ── modal ── */
+    function openModal() {
+      document.getElementById('modalOverlay').classList.add('open');
+    }
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('open');
+    }
+    function closeModalOnOverlay(e) {
+      if (e.target === document.getElementById('modalOverlay')) closeModal();
     }
 
     /* ── helpers ── */
